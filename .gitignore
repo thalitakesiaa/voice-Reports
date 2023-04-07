@@ -12,4 +12,6 @@ build/*
 # Variáveis de ambiente
 .env
 
+.vscode
+
 test/*
