@@ -12,7 +12,7 @@ async function create(req, res) {
             return res.status(400).json({ message: `O email ${req.body.email} já está em uso.` });
         }
 
-        // Apenas administradores podem criar critérios
+        // Apenas administradores podem criar usuarios
         const header = req.headers.authorization;
         const [type, token] = header.split(' ');
 
@@ -21,7 +21,7 @@ async function create(req, res) {
         const decoded = jwt.verify(token, process.env.SECRET);
         const user = await User.findById(decoded.id);
 
-        if (!user.role === 'Administrador') {
+        if (!(user.role === 'Administrador')) {
             return res.status(400).json({ message: 'Usuário não tem permissão para criar novos usuários' });
         }
 

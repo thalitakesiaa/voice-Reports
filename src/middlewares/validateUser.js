@@ -1,4 +1,5 @@
 import validate from './validate';
+import { User } from '../models/User';
 
 /**
  *
@@ -16,6 +17,11 @@ function validateUser(roleSchemas) {
 
         if (!validRoles.includes(role)) {
             return res.status(400).json({ message: `Role attribute must be one of ${validRoles}` });
+        }
+
+        const user = await User.findOne(req.body.email);
+        if (!user.isActive) {
+            return res.status(400).json({ message: 'Usuário não está ativo para acessar o sistema' });
         }
 
         const schema = roleSchemas[role];

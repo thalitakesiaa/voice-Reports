@@ -54,9 +54,9 @@ const userRules = Joi.object({
     isActive: isActiveRules
 });
 
-const authRules = Joi.object({
+const loginRules = Joi.object({
     email: emailRules,
-    password: passwordRules
+    password: passwordRules,
 });
 
-export { User, userRules, authRules };
+export { User, userRules, loginRules };
