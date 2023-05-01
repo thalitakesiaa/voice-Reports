@@ -2,7 +2,7 @@ import { User } from '../models/User';
 
 async function emailInUse(req, res, next) {
     try {
-        const user = await User.findOne({ email: req.body.email });
+        const user = await User.findOne({ email: req.body.email }).exec();
         req.emailInUse = user !== null;
         return next();
     } catch ({ message }) {

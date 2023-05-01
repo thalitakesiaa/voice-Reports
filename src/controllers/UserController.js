@@ -13,27 +13,32 @@ async function alterUser(req, res) {
         isMalformed(type, token);
 
         const decoded = jwt.verify(token, process.env.SECRET);
-        let user = await User.findById(decoded.id);
+        let userSolicitor = await User.findById(decoded.id);
 
-        if (!(user.role === 'Administrador') && (body.role != null)) {
-            return res.status(400).json({ message: 'Usuário não tem permissão para role' });
+        if (!(userSolicitor.role === 'Administrador') && (body.role != null)) {
+            return res.status(400).json({ message: 'Usuário não tem permissão para editar a role' });
         }
 
         if (body.isActive) {
             return res.status(400).json({ message: 'Usuário não pode alteração a ativação' });
         }
-        const emailExist = await User.findOne({ email: body.email });
 
-        if (emailExist != null) {
+        const newEmail = await User.findOne({ email: body.email });
+
+        if (newEmail != null) {
             return res.status(409).json({ message: `Esse email ${body.email} já está em uso` });
         }
 
-        user = await User.findByIdAndUpdate(userId, body, { new: true }).select('+password');
+        if ((userSolicitor.id === userId && req.body.password != null)) {
+            userSolicitor = await User.findByIdAndUpdate(userId, body, { new: true }).select('+password');
 
-        await user.save();
-        user.password = undefined;
+            await userSolicitor.save();
+            userSolicitor.password = undefined;
+        } else {
+            return res.status(400).json({ message: 'Usuário não tem permissão para editar a senha de outro usuário' });
+        }
 
-        return res.status(200).json(user);
+        return res.status(200).json(userSolicitor);
     } catch ({ message }) {
         return res.status(500).json({ message });
     }

@@ -1,5 +1,7 @@
+import jwt from 'jsonwebtoken';
 import validate from './validate';
 import { User } from '../models/User';
+import isMalformed from './isMalformed';
 
 /**
  *
@@ -19,9 +21,21 @@ function validateUser(roleSchemas) {
             return res.status(400).json({ message: `Role attribute must be one of ${validRoles}` });
         }
 
-        const user = await User.findOne(req.body.email);
-        if (!user.isActive) {
-            return res.status(400).json({ message: 'Usuário não está ativo para acessar o sistema' });
+        // Apenas administradores podem criar usuarios
+        const header = req.headers.authorization;
+        const [type, token] = header.split(' ');
+
+        isMalformed(type, token);
+
+        const decoded = jwt.verify(token, process.env.SECRET);
+
+        try {
+            const user = await User.findById(decoded.id);
+            if (!user.isActive) {
+                return res.status(400).json({ message: 'Usuário não está ativo para acessar o sistema' });
+            }
+        } catch (message) {
+            return res.status(500).json({ message });
         }
 
         const schema = roleSchemas[role];
